@@ -9,7 +9,11 @@ import click
 # @click.option('--board-size', default = 4, help = 'size of board')
 # @click.option('--limit', default = np.Inf, help = 'number of solutions to find')
 
-
+def main(puzzle_size):
+    model = cp_model.CpModel()
+    
+    grid = np.array([model.NewIntVar(1, 5, f'{i}') for i in range(puzzle_size ** 2)])
+    grid = grid.reshape((puzzle_size, puzzle_size))
 
 
 ### below is code from n-queens - can definitely use some of this!!
