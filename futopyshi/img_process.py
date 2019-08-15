@@ -1,9 +1,14 @@
 import numpy as np
 import cv2
+import logging
+
+logger = logging.getLogger('__main__')
+
+### code adapted from https://medium.com/coinmonks/a-box-detection-algorithm-for-any-image-containing-boxes-756c15d7ed26
 
 def process_image(path):
     img = cv2.imread(path, 0)
-    (thresh, img_bin) = cv2.threshold(img, 128, 255,cv2.THRESH_BINARY|     cv2.THRESH_OTSU)
+    (thresh, img_bin) = cv2.threshold(img, 128, 255,cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     
     # Invert the image
     img_bin = 255 - img_bin 
@@ -38,6 +43,9 @@ def process_image(path):
     contours, hierarchy = cv2.findContours(img_final_bin, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key=lambda ctr: cv2.boundingRect(ctr)[0] + cv2.boundingRect(ctr)[1] * img_final_bin.shape[1])
     
+    logger.debug(f'all contours created, total = {len(contours)}')
+    
+    
     cropped_dir_path = r'data/cropped/'
     idx = 0
     scale = 0.80
@@ -57,6 +65,9 @@ def process_image(path):
             idx += 1
             new_img = img[y:y+h, x:x+w]
             cv2.imwrite(cropped_dir_path+str(idx) + '.png', new_img)
+            # draw as rect for whole image view
             cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),1)
     
+    logger.info(f'{idx} final contours identified')
+    # write whole image with bounding box rects drawn
     cv2.imwrite('data/img_with_boxes.png', img)
