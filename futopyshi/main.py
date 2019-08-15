@@ -1,11 +1,10 @@
-from capture import *
-from img_process import *
-from ocr import *
-from solver import *
+from futopyshi.capture import *
+from futopyshi.img_process import *
+from futopyshi.ocr import *
+from futopyshi.solver import *
 import logging
 import time
 
-### TODO children of main need to inherit logging config
 fh = logging.FileHandler('runtime.log')
 fh.setLevel(logging.DEBUG)
 formatter = logging.Formatter("[%(asctime)s] [%(levelname)8s] [%(filename)15s:%(lineno)s] --- %(message)s", 
@@ -20,7 +19,13 @@ IMG_PATH = 'data/puzzle_capture.png'
 CROPPED_PATH = 'data/cropped/*.png'
 SAMPLE_IMG = 'data/sample_img.jpg'
 
+
 def main():
+    """
+
+    :return:
+    """
+
     logger.info('-' * 10 + ' new run ' + '-' * 10)
     # get_puzzle(IMG_PATH) # test processing
     
@@ -40,7 +45,10 @@ def main():
     print(f'Processing time: {round(total_time, 4)}')
     
     logger.info('-' * 10 + ' run exiting ' + '-' * 10)
+    
+    # TODO add cleanup script?
     return status
+
 
 if __name__ == '__main__':
     main()

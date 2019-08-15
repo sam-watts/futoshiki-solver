@@ -4,7 +4,14 @@ import logging
 
 logger = logging.getLogger('__main__')
 
-def solve_puzzle(puzzle_size, start_numbers, ineqs=None):
+
+def solve_puzzle(puzzle_size, start_numbers):
+    """
+
+    :param puzzle_size: size of the futoshiki puzzle
+    :param start_numbers:
+    :return: final status of ortools solver
+    """
     # define model
     model = cp_model.CpModel()
 
@@ -28,43 +35,43 @@ def solve_puzzle(puzzle_size, start_numbers, ineqs=None):
     # * `[1]` = is on the higher side of the inequality
     
     # as 1D coordinates, deprecated
-    # ineqs = [(1,0), (3,2), (4,3), (18,19), (20,21), (21,22)]
+    # inequals = [(1,0), (3,2), (4,3), (18,19), (20,21), (21,22)]
     
     # as 2D coordinates, currently in use
     # format: ((row,col), (row,col)), zero indexed
-    ### ADDED FOR SAMPLE PUZZLE
-    ### TODO implement read from image
-    ineqs = [
-        ((0,0), (1,0)),
-        ((1,2), (1,3)),
-        ((1,1), (2,1)),
-        ((1,2), (2,2)),
-        ((1,4), (2,4)),
-        ((2,3), (2,2)),
-        ((2,3), (2,4)),
-        ((2,0), (3,0)),
-        ((3,1), (3,0)),
-        ((3,3), (3,4)),
-        ((3,1), (4,1)),
-        ((4,1), (4,2)),
-        ((4,4), (4,3))
+    # ADDED FOR SAMPLE PUZZLE
+    # TODO implement read from image
+    inequals = [
+        ((0, 0), (1, 0)),
+        ((1, 2), (1, 3)),
+        ((1, 1), (2, 1)),
+        ((1, 2), (2, 2)),
+        ((1, 4), (2, 4)),
+        ((2, 3), (2, 2)),
+        ((2, 3), (2, 4)),
+        ((2, 0), (3, 0)),
+        ((3, 1), (3, 0)),
+        ((3, 3), (3, 4)),
+        ((3, 1), (4, 1)),
+        ((4, 1), (4, 2)),
+        ((4, 4), (4, 3))
         ]
     
     # add inequality constraints
-    for i in ineqs:
+    for i in inequals:
         model.Add(grid[i[0]] < grid[i[1]])
     
     # define solver
     solver = cp_model.CpSolver()
-    solution_printer = DiagramPrinter(grid, ineqs)
+    solution_printer = DiagramPrinter(grid, inequals)
     
     status = solver.SearchForAllSolutions(model, solution_printer)
     logger.debug(f'solver status = {status}')
     
-    print(f'Solutions found : {solution_printer.SolutionCount()}')
+    print(f'Solutions found : {solution_printer.solution_count()}')
     
     return status
-    
+
 
 class DiagramPrinter(cp_model.CpSolverSolutionCallback):
     def __init__(self, variables, ineqs):
@@ -77,8 +84,8 @@ class DiagramPrinter(cp_model.CpSolverSolutionCallback):
         self.__solution_count += 1
         
         # define inequality symbols
-        tb = '˄' # u'\u22C0' # ⋀
-        bt = '˅' # u'\u22C1' # ⋁
+        tb = '˄'  # u'\u22C0' # ⋀
+        bt = '˅'  # u'\u22C1' # ⋁
         lr = '<'
         rl = '>'
         
@@ -105,16 +112,16 @@ class DiagramPrinter(cp_model.CpSolverSolutionCallback):
                 lower = ineq[0]
                 higher = ineq[1]
                 
-                if lower[0] == higher[0]: # if in the same row
-                    if lower[1] > higher[1]: # if lower end is to the right
+                if lower[0] == higher[0]:  # if in the same row
+                    if lower[1] > higher[1]:  # if lower end is to the right
                         col_sep[col_subs[min(lower[1], higher[1])]] = rl
-                    elif lower[1] < higher[1]: # if lower end is to the left
+                    elif lower[1] < higher[1]:  # if lower end is to the left
                         col_sep[col_subs[min(lower[1], higher[1])]] = lr
                     
-                elif i != 4 and lower[1] == higher[1]: # if in the same column, don't need for final row
-                    if lower[0] > higher[0]: # if the lower end is on the bottom column
+                elif i != 4 and lower[1] == higher[1]:  # if in the same column, don't need for final row
+                    if lower[0] > higher[0]:  # if the lower end is on the bottom column
                         row_sep[row_subs[lower[1]]] = bt
-                    elif lower[0] < higher[0]: # if the lower end is on top column
+                    elif lower[0] < higher[0]:  # if the lower end is on top column
                         row_sep[row_subs[lower[1]]] = tb
                 
                 # remove entry at end of loop to avoid double printing
@@ -122,7 +129,6 @@ class DiagramPrinter(cp_model.CpSolverSolutionCallback):
                        
             print(''.join(col_sep))
             print(''.join(row_sep))
-        
-    
-    def SolutionCount(self):
+
+    def solution_count(self):
         return self.__solution_count
