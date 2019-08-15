@@ -3,12 +3,15 @@ import pytesseract
 import glob
 import re
 import cv2
-import os
 import logging
 
 logger = logging.getLogger('__main__')
 
+
 def puzzle_ocr(cropped_path):
+    """
+    
+    """
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     paths = glob.glob(cropped_path)
     puzzle_size = int(np.sqrt(len(paths)))
