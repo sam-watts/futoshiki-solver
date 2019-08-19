@@ -3,6 +3,7 @@ import logging
 
 logger = logging.getLogger('__main__')
 
+# TODO compare shape of frame to ouputted image
 
 def capture_image(img_path):
     """
@@ -16,11 +17,14 @@ def capture_image(img_path):
         ret, frame = cam.read()
         height, width = frame.shape[:2]
         s_len = 300
-        ver_bl = (width // 2 - s_len // 2, height // 2 - s_len // 2)
-        ver_tr = (width // 2 + s_len // 2, height // 2 + s_len // 2)
+        # ver_bl = (width // 2 - s_len // 2, height // 2 - s_len // 2)
+        # ver_tr = (width // 2 + s_len // 2, height // 2 + s_len // 2)
+        
+        ver_tl = (width // 2 - s_len // 2, height // 2 + s_len // 2)
+        ver_br = (width // 2 + s_len // 2, height // 2 - s_len // 2)
         
         output = frame.copy()
-        cv2.rectangle(output, ver_bl, ver_tr, (0, 0, 0), 2)
+        cv2.rectangle(output, ver_tl, ver_br, (255, 0, 0), 2)
         cv2.putText(output, 'Align puzzle with grid, then press SPACE BAR to capture image',
                     (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
@@ -34,10 +38,17 @@ def capture_image(img_path):
         if k % 256 == 27:
             # ESC pressed
             logger.info('Escape hit, closing window')
+            cv2.destroyAllWindows()
             break
             
         elif k % 256 == 32:
             # SPACE pressed
+            
+            # crop image to frame size
+            # img[y:y+h, x:x+w]
+            # frame = frame[172:172+s_len,93:93+s_len]
+            # print(frame.shape)
+            # print(ver_tl)
             cv2.imwrite(img_path, frame)
             logger.info(f'{img_path} written')
             break
@@ -78,3 +89,6 @@ def get_puzzle(img_path):
         if result:
             cv2.destroyAllWindows()
             break
+
+if __name__ == '__main__':
+    get_puzzle('data/capture_sample.jpg')

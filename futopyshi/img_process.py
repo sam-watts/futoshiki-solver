@@ -5,7 +5,11 @@ import logging
 logger = logging.getLogger('__main__')
 
 # code adapted from https://medium.com/coinmonks/a-box-detection-algorithm-for-any-image-containing-boxes-756c15d7ed26
-
+# TODO Chris suggestions
+# TODO different thresholds from OTSU
+# TODO remove kernel and recombination steps
+# use angles of contours??
+# hough transform??
 
 def process_image(path):
     """
@@ -76,3 +80,6 @@ def process_image(path):
     logger.info(f'{idx} final contours identified')
     # write whole image with bounding boxes drawn
     cv2.imwrite('data/img_with_boxes.png', img)
+
+if __name__ == '__main__':
+    process_image('data/capture_sample.jpg')
