@@ -1,7 +1,7 @@
-from futopyshi.capture import *
-from futopyshi.img_process import *
-from futopyshi.ocr import *
-from futopyshi.solver import *
+from capture import *
+from img_process import *
+from ocr import *
+from solver import *
 import logging
 import time
 
@@ -27,7 +27,7 @@ def main():
     """
 
     logger.info('-' * 10 + ' new run ' + '-' * 10)
-    # get_puzzle(IMG_PATH) # test processing
+    get_puzzle(IMG_PATH) # test processing
     
     # start timer after image is captured
     start = time.time()
