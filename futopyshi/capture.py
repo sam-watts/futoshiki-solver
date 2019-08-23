@@ -20,7 +20,7 @@ def capture_image(img_path):
         # ver_bl = (width // 2 - s_len // 2, height // 2 - s_len // 2)
         # ver_tr = (width // 2 + s_len // 2, height // 2 + s_len // 2)
         
-        ver_tl = (width // 2 - s_len // 2, height // 2 + s_len // 2)
+        ver_tl = (width // 2 - s_len // 2, height // 2 - s_len // 2)
         ver_br = (width // 2 + s_len // 2, height // 2 - s_len // 2)
         
         output = frame.copy()

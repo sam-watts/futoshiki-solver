@@ -7,6 +7,11 @@ import logging
 
 logger = logging.getLogger('__main__')
 
+# TODO ocr for inequality detection
+# within grid, matching to < and > is good - build up a list of characters
+# for ^ and upside down version
+# eg. ^ in ('A', 'n')
+# upside down ^ in ('v', 'V')
 
 def puzzle_ocr(cropped_path):
     """
@@ -38,3 +43,14 @@ def puzzle_ocr(cropped_path):
     logger.debug(f'start numbers = {start_numbers}')
     
     return puzzle_size, start_numbers
+
+def scan_image(path):
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    img = cv2.imread(path)
+    val = pytesseract.image_to_string(img, config='--psm 10')
+    val = val[0] # [x for x in val][0]
+    
+    print('character is: ', val)
+
+if __name__ == '__main__':
+    scan_image('data/ineqs/1.png')
