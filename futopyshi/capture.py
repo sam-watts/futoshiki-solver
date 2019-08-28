@@ -3,13 +3,10 @@ import logging
 
 logger = logging.getLogger('__main__')
 
-# TODO compare shape of frame to ouputted image
-
 def capture_image(img_path):
     """
 
-    :param img_path: path of the image to be captured
-    :return: None
+    
     """
     cam = cv2.VideoCapture(0)
     
@@ -20,11 +17,12 @@ def capture_image(img_path):
         # ver_bl = (width // 2 - s_len // 2, height // 2 - s_len // 2)
         # ver_tr = (width // 2 + s_len // 2, height // 2 + s_len // 2)
         
-        ver_tl = (width // 2 - s_len // 2, height // 2 - s_len // 2)
-        ver_br = (width // 2 + s_len // 2, height // 2 - s_len // 2)
+        tl = (width // 2 - s_len // 2, height // 2 - s_len // 2)
+        br = (width // 2 + s_len // 2, height // 2 + s_len // 2)
         
         output = frame.copy()
-        cv2.rectangle(output, ver_tl, ver_br, (255, 0, 0), 2)
+        output = cv2.flip(output, 1)
+        cv2.rectangle(output, tl, br, (255, 0, 0), 2)
         cv2.putText(output, 'Align puzzle with grid, then press SPACE BAR to capture image',
                     (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
         
@@ -43,13 +41,10 @@ def capture_image(img_path):
             
         elif k % 256 == 32:
             # SPACE pressed
-            
             # crop image to frame size
             # img[y:y+h, x:x+w]
-            # frame = frame[172:172+s_len,93:93+s_len]
-            # print(frame.shape)
-            # print(ver_tl)
-            cv2.imwrite(img_path, frame)
+            frame = frame[tl[1]:tl[1]+s_len, tl[0]:tl[0]+s_len]
+            cv2.imwrite(img_path, frame)            
             logger.info(f'{img_path} written')
             break
     
@@ -61,8 +56,15 @@ def display_preview(img_path):
     
     """
     img = cv2.imread(img_path)
-    cv2.putText(img, 'Press SPACE BAR to accept image, press escape to take another',
-                (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+    
+    text = 'Press SPACE BAR to accept image\nPress ESC to take another'
+    y0, dy = 30, 20
+    
+    for i, line in enumerate(text.split('\n')):
+        y = y0 + i*dy
+        cv2.putText(img, line, (10, y ), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+    
+    
     
     cv2.imshow('Futoshiki Solver Capture', img)
     

@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger('__main__')
 
 
-def solve_puzzle(puzzle_size, start_numbers):
+def solve_puzzle(puzzle_size, start_numbers, inequals):
     """
 
     :param puzzle_size: size of the futoshiki puzzle
@@ -41,21 +41,21 @@ def solve_puzzle(puzzle_size, start_numbers):
     # format: ((row,col), (row,col)), zero indexed
     # ADDED FOR SAMPLE PUZZLE
     # TODO implement read from image
-    inequals = [
-        ((0, 0), (1, 0)),
-        ((1, 2), (1, 3)),
-        ((1, 1), (2, 1)),
-        ((1, 2), (2, 2)),
-        ((1, 4), (2, 4)),
-        ((2, 3), (2, 2)),
-        ((2, 3), (2, 4)),
-        ((2, 0), (3, 0)),
-        ((3, 1), (3, 0)),
-        ((3, 3), (3, 4)),
-        ((3, 1), (4, 1)),
-        ((4, 1), (4, 2)),
-        ((4, 4), (4, 3))
-        ]
+    # inequals = [
+    #     ((0, 0), (1, 0)),
+    #     ((1, 2), (1, 3)),
+    #     ((1, 1), (2, 1)),
+    #     ((1, 2), (2, 2)),
+    #     ((1, 4), (2, 4)),
+    #     ((2, 3), (2, 2)),
+    #     ((2, 3), (2, 4)),
+    #     ((2, 0), (3, 0)),
+    #     ((3, 1), (3, 0)),
+    #     ((3, 3), (3, 4)),
+    #     ((3, 1), (4, 1)),
+    #     ((4, 1), (4, 2)),
+    #     ((4, 4), (4, 3))
+    #     ]
     
     # add inequality constraints
     for i in inequals:
@@ -84,8 +84,8 @@ class DiagramPrinter(cp_model.CpSolverSolutionCallback):
         self.__solution_count += 1
         
         # define inequality symbols
-        tb = '˄'  # u'\u22C0' # ⋀
-        bt = '˅'  # u'\u22C1' # ⋁
+        tb = 'ʌ'  # u'\u22C0' # ⋀ v
+        bt = 'v'  # u'\u22C1' # ⋁ ʌ
         lr = '<'
         rl = '>'
         
@@ -101,6 +101,7 @@ class DiagramPrinter(cp_model.CpSolverSolutionCallback):
             row = row.tolist()
             vals = [self.Value(val) for val in row]
             
+            # row / col subs are indisces to subsitute for inequalitiess
             col_sep = ['|', ' '] + list(' | '.join(str(x) for x in vals)) + [' ', '|']
             col_subs = [4, 8, 12, 16]
             
