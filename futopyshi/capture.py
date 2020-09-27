@@ -69,9 +69,10 @@ def display_preview(image: np.ndarray) -> bool:
     
     for i, line in enumerate(text.split('\n')):
         y = y0 + i*dy
-        cv2.putText(image, line, (10, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+        img_ref = image.copy()
+        cv2.putText(img_ref, line, (10, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
     
-    cv2.imshow('Futoshiki Solver Capture', image)
+    cv2.imshow('Futoshiki Solver Capture', img_ref)
     
     k = cv2.waitKey()
     
