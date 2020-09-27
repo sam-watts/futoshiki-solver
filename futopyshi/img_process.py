@@ -7,20 +7,26 @@ from utils import resolve_path
 
 logger = logging.getLogger('__main__')
 
-def process_image(path, debug=False):
-    """
+def process_image(path: Union[str, np.ndarray], debug: bool = False) ->  Tuple[list, list, list]:
+    """Process the captured puzzle image.
+    
+    This produces crops of all number boxes, and inferred boxes for inequalities
 
-    :param path: path of the image to be processed
-    :return: None
+    :param path: path or object of the image to be processed
+    :param debug: save cropped images to file for debugging purposes, defaults to False
+    :return: start numbers, row inequalities, column inequalities
     """
     if type(path) == np.ndarray:
         img = path
-        img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     elif type(path) == str:
-        img = cv2.imread(path, 0)
+        img = cv2.imread(path, 1)
     else:
         raise TypeError('path must be a path to an image or an image array')
         
+    img_ref = img.copy()
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+    base_img = img.copy()
+
     # (thresh, img_bin) = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     kernel_size = int(np.asarray(img.shape).max() * 0.10 // 1)
     kernel_size = kernel_size if kernel_size % 2 != 0 else kernel_size + 1
@@ -65,7 +71,7 @@ def process_image(path, debug=False):
     
     # sort by left-to-right, top-to-bottom
     contours = sorted(contours,
-                      key=lambda ctr: cv2.boundingRect(ctr)[0] + cv2.boundingRect(ctr)[1] * img_final_bin.shape[1] // 20)
+                      key=lambda ctr: cv2.boundingRect(ctr)[0] + cv2.boundingRect(ctr)[1] * img_final_bin.shape[1] // 50)
     
     logger.debug(f'all contours created, total = {len(contours)}')
 
@@ -87,7 +93,7 @@ def process_image(path, debug=False):
     # with open('futopyshi/data/contours.pkl', 'wb') as handle:
     #     pickle.dump(contours, handle)
     
-    for c in tqdm(contours):
+    for c in tqdm(contours, desc='Processing contours...'):
         # Returns the top left vertex coords and width,height for every contour
         # x measured from left, y measured from top
         box_contours.append(c)
@@ -99,27 +105,26 @@ def process_image(path, debug=False):
             crop_w, crop_h = int(w * scale), int(h * scale)
             crop_x, crop_y = int(centre[0] - crop_w//2), int(centre[1] - crop_h//2)
             
-            new_img = img_bin[crop_y:crop_y+crop_h, crop_x:crop_x+crop_w]
+            new_img = base_img[crop_y:crop_y+crop_h, crop_x:crop_x+crop_w]
             box_images.append(new_img)
 
             if debug:
                 cv2.imwrite(cropped_dir_path+str(ind) + '.png', new_img)
-                cv2.rectangle(img,(crop_x,crop_y),(crop_x+crop_w,crop_y+crop_h),(255,0,0),rect_size)
-                cv2.putText(img, str(ind),(x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                cv2.rectangle(img_ref,(crop_x,crop_y),(crop_x+crop_w,crop_y+crop_h),(255, 0,0), rect_size)
+                cv2.putText(img_ref, str(ind),(x, y), cv2.FONT_HERSHEY_SIMPLEX, 5, (255, 0, 0), 5)
             
             
             # for row inequalities
             if (ind + 1) % 5 != 0:
-                logger.debug('row added')
                 x_right = int(x + w * 1.1)
                 w_right = int(w * 0.7)
-                new_img = img_bin[y:y+h, x_right:x_right+w_right]
+                new_img = base_img[y:y+h, x_right:x_right+w_right]
                 row_inequalities.append(new_img)
                 
                 if debug:
                     cv2.imwrite(cropped_row_path+str(r_ind) + '.png', new_img)
-                    cv2.rectangle(img,(x_right,y),(x_right+w_right,y+h),(255,0,0),rect_size)
-                    # cv2.putText(img, str(r_ind),(x_right, y), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+                    cv2.rectangle(img_ref,(x_right,y),(x_right+w_right,y+h),(0,255,0),rect_size)
+                    # cv2.putText(img_ref, str(r_ind),(x_right, y), cv2.FONT_HERSHEY_SIMPLEX, 10, (0, 255, 0), 1)
                 
                 r_ind = ind - (ind // 5)    
                 # r_ind += 1
@@ -129,13 +134,14 @@ def process_image(path, debug=False):
             if ind < 20:
                 y_below = int(y + h * 1.1)
                 h_below = int(h * 0.7)
-                new_img = img_bin[y_below:y_below+h_below, x:x+w]
+                new_img = base_img[y_below:y_below+h_below, x:x+w]
                 new_img = np.rot90(new_img, axes=(1,0))  # rotate to make them recognisable
                 col_inequalities.append(new_img)
                 
                 if debug:
                     cv2.imwrite(cropped_col_path+str(c_ind) + '.png', new_img)
-                    cv2.rectangle(img,(x,y_below),(x+w,y_below+h_below),(255,0,0),rect_size)
+                    cv2.rectangle(img_ref,(x,y_below),(x+w,y_below+h_below),(0,0,255),rect_size)
+                    # cv2.putText(img_ref, str(c_ind),(x, y_below), cv2.FONT_HERSHEY_SIMPLEX, 10, (0, 0, 255), 1)
 
                 c_ind += 1
                                 
@@ -143,7 +149,7 @@ def process_image(path, debug=False):
             
     logger.debug(f'{ind} final contours kept')
     if debug:
-        cv2.imwrite('img_with_boxes.png', img)
+        cv2.imwrite('img_with_boxes.png', img_ref)
     
     if ind == 25:
         print('Accepted contours', ind)

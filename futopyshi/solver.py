@@ -4,12 +4,12 @@ import logging
 
 logger = logging.getLogger('__main__')
 
+def solve_puzzle(start_numbers: dict, inequals:dict, puzzle_size:int = 5) -> int:
+    """Solve a puzzle
 
-def solve_puzzle(puzzle_size, start_numbers, inequals):
-    """
-
-    :param puzzle_size: size of the futoshiki puzzle
-    :param start_numbers:
+    :param start_numbers: locations of any numbers in the puzzle
+    :param inequals: locations of any inequalities in the puzzle
+    :param puzzle_size: size of the puzzle, defaults to 5
     :return: final status of ortools solver
     """
     # define model
@@ -28,34 +28,6 @@ def solve_puzzle(puzzle_size, start_numbers, inequals):
     
     for column in grid.T:
         model.AddAllDifferent(column)
-        
-    # Create inequality constraints  
-    # data format as tuples, 
-    # * `[0]` = is on the lower side of the inequality
-    # * `[1]` = is on the higher side of the inequality
-    
-    # as 1D coordinates, deprecated
-    # inequals = [(1,0), (3,2), (4,3), (18,19), (20,21), (21,22)]
-    
-    # as 2D coordinates, currently in use
-    # format: ((row,col), (row,col)), zero indexed
-    # ADDED FOR SAMPLE PUZZLE
-    # TODO implement read from image
-    # inequals = [
-    #     ((0, 0), (1, 0)),
-    #     ((1, 2), (1, 3)),
-    #     ((1, 1), (2, 1)),
-    #     ((1, 2), (2, 2)),
-    #     ((1, 4), (2, 4)),
-    #     ((2, 3), (2, 2)),
-    #     ((2, 3), (2, 4)),
-    #     ((2, 0), (3, 0)),
-    #     ((3, 1), (3, 0)),
-    #     ((3, 3), (3, 4)),
-    #     ((3, 1), (4, 1)),
-    #     ((4, 1), (4, 2)),
-    #     ((4, 4), (4, 3))
-    #     ]
     
     # add inequality constraints
     for i in inequals:
@@ -74,6 +46,7 @@ def solve_puzzle(puzzle_size, start_numbers, inequals):
 
 
 class DiagramPrinter(cp_model.CpSolverSolutionCallback):
+    """Print solutions as a callback"""
     def __init__(self, variables, ineqs):
         cp_model.CpSolverSolutionCallback.__init__(self)
         self.__variables = variables
