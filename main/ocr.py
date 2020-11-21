@@ -4,16 +4,32 @@ import glob
 import re
 import cv2
 import logging
-# from general import dim_transform
 from utils import print_puzzle, dim_transform
 from typing import Tuple
+import platform
 
 # debugging
 import matplotlib.pyplot as plt
 
 logger = logging.getLogger('__main__')
 
-# TODO use pytorch model instead of tesseract
+# -- Tesseract config --
+# see `tesseract --help-extra` for more options
+# psm 10 = Page segmentation mode, treat the image as a single character 
+# oem 0 = OCR engine mode, compatibility mode for tesseract 4.x.x 
+# tessedit_char_whitelist = allowed characters to detect
+# tessdata-dir = directory for trained language data
+
+if platform.system() == 'Windows':
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
+    CONFIG = '--oem 0 --psm 10 -c tessedit_char_whitelist={whitelist} --tessdata-dir "C:\\Program Files (x86)\\Tesseract-OCR\\tessdata\"'
+elif platform.system() == 'Linux':
+    pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+    CONFIG = '--oem 0 --psm 10 -c tessedit_char_whitelist={whitelist} --tessdata-dir /usr/local/share/tessdata/'
+else:
+    raise OSError('OS not recognised')
+
+    
 
 def ocr_run(images: list, rot: bool=False, char_whitelist: str=None) -> dict:
     """Run the OCR process on a list of images
@@ -43,12 +59,14 @@ def ocr_run(images: list, rot: bool=False, char_whitelist: str=None) -> dict:
         
         if var > check_var:
             _, image = cv2.threshold(image, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
-            # psm 10 = treat the image as a single character
-            config = f'--psm 10 -c tessedit_char_whitelist={char_whitelist} --tessdata-dir "C:\\Program Files (x86)\\Tesseract-OCR\\tessdata\"'
-            val = pytesseract.image_to_string(image, config=config)
-            characters[i] = val
+            val = pytesseract.image_to_string(image, config=CONFIG.format(whitelist=char_whitelist))
+            val = val[0].replace('\x0c', '')
+            
+            # only add if not empty string
+            if val:
+                characters[i] = val
         
-    logger.debug(f'start numbers = {characters}')
+    logger.debug(f'values = {characters}')
     
     return characters
 
@@ -77,15 +95,12 @@ def scan_images(boxes: Tuple[list, list, list]) -> Tuple[dict, dict]:
     :param boxes: images of numbers and two types of inequalities
     :return: starting numbers and inequality values and locations
     """
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
     start_numbers = ocr_run(boxes[0], char_whitelist='12345')
     row_inequals = ocr_run(boxes[1], char_whitelist='<>')
     col_inequals = ocr_run(boxes[2], char_whitelist='<>')
     
-    # start_numbers = {2: '2', 14: '4', 20: '3'} # TESTING
-
     try:
-        start_numbers = {k: int(v) for k, v in start_numbers.items()}
+        start_numbers = {k: int(v) for k, v in start_numbers.items() if v != ''}
     except:
         raise ValueError(f'Invalid start numbers\n{start_numbers}')
     
@@ -102,6 +117,7 @@ def scan_images(boxes: Tuple[list, list, list]) -> Tuple[dict, dict]:
         numbers[row, col] = v
 
     numbers = numbers.astype(int)
+    print('Puzzle structure:')
     print_puzzle(numbers, inequals)
     
     return start_numbers, inequals
@@ -136,10 +152,8 @@ def convert_inequals(row_inequals: dict, col_inequals: dict) -> dict:
 
 def scan_image(path):
     """Testing function to scan a single image from file"""
-    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files (x86)\Tesseract-OCR\tesseract.exe'
     img = cv2.imread(path)
-    # img = 255 - img 
-    val = pytesseract.image_to_string(img, lang='eng', config='--psm 10 -c tessedit_char_whitelist=12345<> --tessdata-dir "C:\\Program Files (x86)\\Tesseract-OCR\\tessdata\"')
+    val = pytesseract.image_to_string(img, config=CONFIG.format(whitelist='12345<>'))
     val = val[0] 
     
     print('character is: ', val)

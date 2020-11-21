@@ -5,6 +5,8 @@ import numpy as np
 import cv2
 from PIL import Image, ImageDraw
 import functools
+import urllib.request
+from tqdm import tqdm
 
 def resolve_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
@@ -120,3 +122,16 @@ def image_transpose_exif(im: np.array) -> np.array:
         return im
     else:
         return functools.reduce(type(im).transpose, seq, im)
+    
+    
+class DownloadProgressBar(tqdm):
+    def update_to(self, b=1, bsize=1, tsize=None):
+        if tsize is not None:
+            self.total = tsize
+        self.update(b * bsize - self.n)
+
+
+def download_url(url, output_path):
+    with DownloadProgressBar(unit='B', unit_scale=True,
+                             miniters=1, desc=url.split('/')[-1]) as t:
+        urllib.request.urlretrieve(url, filename=output_path, reporthook=t.update_to)
