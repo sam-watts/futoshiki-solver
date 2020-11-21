@@ -45,4 +45,4 @@ Press SPACE to run the initial capture - after this the capture window will clos
 # Write ups
 
 [Medium - Solving Futoshiki Puzzles in Python](https://medium.com/swlh/solving-futoshiki-puzzles-in-python-d2c3caea3dd2)
-[Medium - Building a Custom Semantic Segmentation Model](<<add link here>>)
+[Medium - Building a Custom Semantic Segmentation Model](https://medium.com/@sam.watts445/building-a-custom-semantic-segmentation-model-abb0843ac12d)
