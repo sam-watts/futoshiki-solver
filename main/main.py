@@ -26,7 +26,6 @@ logger.setLevel(logging.INFO)
 logger.addHandler(fh)
 logger.addHandler(consoleHandler)
 
-
 def main():
     """Run the end to end solver program.
     

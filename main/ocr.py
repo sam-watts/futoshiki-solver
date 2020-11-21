@@ -67,6 +67,7 @@ def ocr_run(images: list, rot: bool=False, char_whitelist: str=None) -> dict:
                 characters[i] = val
         
     logger.debug(f'values = {characters}')
+
     
     return characters
 
@@ -95,10 +96,12 @@ def scan_images(boxes: Tuple[list, list, list]) -> Tuple[dict, dict]:
     :param boxes: images of numbers and two types of inequalities
     :return: starting numbers and inequality values and locations
     """
+
     start_numbers = ocr_run(boxes[0], char_whitelist='12345')
     row_inequals = ocr_run(boxes[1], char_whitelist='<>')
     col_inequals = ocr_run(boxes[2], char_whitelist='<>')
     
+
     try:
         start_numbers = {k: int(v) for k, v in start_numbers.items() if v != ''}
     except:
@@ -118,6 +121,7 @@ def scan_images(boxes: Tuple[list, list, list]) -> Tuple[dict, dict]:
 
     numbers = numbers.astype(int)
     print('Puzzle structure:')
+
     print_puzzle(numbers, inequals)
     
     return start_numbers, inequals

@@ -27,6 +27,7 @@ def capture_image(save_img: str=None, flip: bool=False) -> Union[np.ndarray, boo
         if flip:
             output = cv2.flip(output, -1)
             
+
         cv2.rectangle(output, tl, br, (255, 0, 0), 2)
         cv2.putText(output, 'Align puzzle with grid, then press SPACE BAR to capture image',
                     (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)

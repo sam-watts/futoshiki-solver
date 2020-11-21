@@ -8,6 +8,7 @@ import functools
 import urllib.request
 from tqdm import tqdm
 
+
 def resolve_path(path):
     return os.path.join(os.path.dirname(os.path.realpath(__file__)), path)
 
@@ -135,3 +136,4 @@ def download_url(url, output_path):
     with DownloadProgressBar(unit='B', unit_scale=True,
                              miniters=1, desc=url.split('/')[-1]) as t:
         urllib.request.urlretrieve(url, filename=output_path, reporthook=t.update_to)
+
