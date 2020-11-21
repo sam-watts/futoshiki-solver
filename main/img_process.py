@@ -3,7 +3,11 @@ import cv2
 import logging
 import pickle
 from tqdm import tqdm
-from utils import resolve_path
+from typing import Union, Tuple
+try:
+    from utils import resolve_path
+except ImportError:
+    from .utils import resolve_path
 
 logger = logging.getLogger('__main__')
 
@@ -27,9 +31,8 @@ def process_image(path: Union[str, np.ndarray], debug: bool = False) ->  Tuple[l
     img = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
     base_img = img.copy()
 
-    # (thresh, img_bin) = cv2.threshold(img, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
     kernel_size = int(np.asarray(img.shape).max() * 0.10 // 1)
-    kernel_size = kernel_size if kernel_size % 2 != 0 else kernel_size + 1
+    kernel_size = kernel_size if kernel_size % 2 != 0 else kernel_size + 1  # make odd
     C = kernel_size // 10
     
     img_bin = cv2.adaptiveThreshold(img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, kernel_size, C)
@@ -111,7 +114,7 @@ def process_image(path: Union[str, np.ndarray], debug: bool = False) ->  Tuple[l
             if debug:
                 cv2.imwrite(cropped_dir_path+str(ind) + '.png', new_img)
                 cv2.rectangle(img_ref,(crop_x,crop_y),(crop_x+crop_w,crop_y+crop_h),(255, 0,0), rect_size)
-                cv2.putText(img_ref, str(ind),(x, y), cv2.FONT_HERSHEY_SIMPLEX, 5, (255, 0, 0), 5)
+                cv2.putText(img_ref, str(ind),(x, y), cv2.FONT_HERSHEY_SIMPLEX, rect_size // 2, (255, 0, 0), rect_size)
             
             
             # for row inequalities

@@ -6,7 +6,7 @@ from typing import Union
 
 logger = logging.getLogger('__main__')
 
-def capture_image(save_img: str=None) -> Union[np.ndarray, bool]:
+def capture_image(save_img: str=None, flip: bool=False) -> Union[np.ndarray, bool]:
     """Capture webcam image of puzzle using cv2 display.
 
     :param save_img: path to write image to, defaults to None
@@ -23,7 +23,11 @@ def capture_image(save_img: str=None) -> Union[np.ndarray, bool]:
         br = (width // 2 + grid_length // 2, height // 2 + grid_length // 2)  # bottom right
         
         output = frame.copy()
-        output = cv2.flip(output, -1)
+        
+        if flip:
+            output = cv2.flip(output, -1)
+            
+
         cv2.rectangle(output, tl, br, (255, 0, 0), 2)
         cv2.putText(output, 'Align puzzle with grid, then press SPACE BAR to capture image',
                     (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
